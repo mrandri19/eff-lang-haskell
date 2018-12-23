@@ -57,19 +57,18 @@ veval expr env = case expr of
   VFun _ _ -> undefined
   VHandler _ -> expr
 
+data Error = UnhandledOp deriving (Show, Eq, Ord)
 
-top_handle :: Computation -> Env -> IO ()
+top_handle :: Computation -> Env -> IO (Either Error Value)
 top_handle expr env = case ceval expr env of
-  CReturn v -> do
-    putStrLn $ show v
+  CReturn v -> return $ Right v
 
   COperation "read" VUnit y c -> do
-    line <- getLine
-    let new_env = Map.insert y (VString line) env
+    let new_env = Map.insert y (VString "Hello, world") env
     top_handle c new_env
 
   COperation op _ _ _ -> do
-    putStrLn $ "Unhandled Operation: " ++ op
+    return (Left UnhandledOp)
 
   u -> error $ show u ++ "\n" ++ show env
 
