@@ -1,7 +1,7 @@
 module Main where
 
-import Syntax
-import qualified BigStepEval as B
+import           Syntax
+import qualified BigStepEval                   as B
 
 main :: IO ()
 main = undefined

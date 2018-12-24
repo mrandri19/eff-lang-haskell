@@ -1,7 +1,7 @@
 -- TODO: fix exports
 module Syntax where
 
-import qualified Data.Set as Set
+import qualified Data.Set                      as Set
 
 type VariableName = String
 type ContinuationName = String
@@ -31,12 +31,12 @@ data Computation = CReturn Value
 
 freeVariablesOfValue :: Value -> Set.Set VariableName
 freeVariablesOfValue v = case v of
-    VVar name -> Set.singleton name
-    VBool _ -> Set.empty
-    VString _ -> Set.empty
-    VUnit -> Set.empty
-    VFun x c -> x `Set.delete` (freeVariablesOfComputation c)
-    VHandler _ -> undefined
+    VVar    name -> Set.singleton name
+    VBool   _    -> Set.empty
+    VString _    -> Set.empty
+    VUnit        -> Set.empty
+    VFun x c     -> x `Set.delete` (freeVariablesOfComputation c)
+    VHandler _   -> undefined
 
 freeVariablesOfComputation :: Computation -> Set.Set VariableName
 freeVariablesOfComputation c = case c of
@@ -44,12 +44,12 @@ freeVariablesOfComputation c = case c of
 
 substValueIntoValue :: Value -> VariableName -> Value -> Value
 substValueIntoValue v x v' = case v' of
-    VUnit -> v'
-    VString _ -> v'
-    VBool _ -> v'
+    VUnit             -> v'
+    VString _         -> v'
+    VBool   _         -> v'
     VVar x' | x' == x -> v
     VVar x' | x' /= x -> v'
-    VFun x' c| ((x' /= x) && (x' `notElem` (freeVariablesOfValue v))) ->
+    VFun x' c | ((x' /= x) && (x' `notElem` (freeVariablesOfValue v))) ->
         VFun x' (substValueIntoComputation v x c)
 
 substValueIntoComputation :: Value -> VariableName -> Computation -> Computation
