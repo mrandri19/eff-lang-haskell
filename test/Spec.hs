@@ -44,6 +44,17 @@ main = hspec $ do
       correct <- return (Right (VBool True))
       result `shouldBe` correct
 
+    it "evaluates closures" $ do
+      -- do b <- (do a <- return 12 in return (fun x -> return a)) in b ()
+      result <- run
+        (CDo "b"
+             (CDo "a" (CReturn (VNum 12)) (CReturn (VFun "x" (CReturn (VVar "a")))))
+             (CApp (VVar "b") VUnit)
+        )
+      -- 12
+      correct <- return (Right (VNum 12))
+      result `shouldBe` correct
+
     it "evaluates handler returns" $ do
       -- with {return x -> return x} handle (return true)
       result  <- run (CWith (Handler (Just ("x", (CReturn $ VVar "x"))) []) (CReturn $ VBool True))

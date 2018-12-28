@@ -16,6 +16,7 @@ type Env = Map.Map VariableName Value
 emptyEnv :: Map.Map VariableName Value
 emptyEnv = Map.empty
 
+-- TODO: don't return a computation, return a value instead, like a closure or a primitive val
 -- Big step
 ceval :: Computation -> Env -> Computation
 ceval expr env = case expr of
@@ -25,7 +26,7 @@ ceval expr env = case expr of
   CDo x (CReturn v) c          -> ceval c (Map.insert x (veval v env) env)
   -- I feel like it should be here
   CDo x (COperation op v y c1) c2 -> COperation op v y (CDo x c1 c2)
-  CDo x c1 c2                  -> CDo x (ceval c1 env) c2
+  CDo x c1 c2                  -> ceval (CDo x (ceval c1 env) c2) env
 
   CIf (VBool True) c1 _        -> c1
   CIf (VBool False) _ c2       -> c2
@@ -48,7 +49,7 @@ ceval expr env = case expr of
           Nothing -> COperation op v y (CWith h c)
   CWith h c -> CWith h (ceval c env)
 
-  _         -> error $ show expr ++ "\n" ++ show env
+  _         -> error $ "I don't know how to handle this:\n" ++ show expr ++ "\n" ++ show env
 
 veval :: Value -> Env -> Value
 veval expr env = case expr of
@@ -59,7 +60,10 @@ veval expr env = case expr of
   VString _  -> expr
   VNum    _  -> expr
   VUnit      -> expr
-  VFun _ _   -> undefined
+  -- FIXME: have some way to represent a closure I suppose.
+  -- This is not call by value
+  -- WTF, I am evaluating a function's content before acutally executing it
+  VFun x c   -> VFun x (ceval c env)
   VHandler _ -> expr
 
 data Error = UnhandledOp OperationName deriving (Show, Eq, Ord)
