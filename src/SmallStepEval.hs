@@ -4,6 +4,7 @@ import           Data.List                      ( find )
 import qualified Data.Set                      as Set
 
 import           Syntax
+import           Util
 
 -- Small step
 eval :: Computation -> Computation
@@ -37,7 +38,7 @@ eval expr = case expr of
     let ops = operationClauses h
     in  case find (\(op', _, _, _) -> op' == op) ops of
 
-                                                                -- Rule 9
+                                                                    -- Rule 9
           Just (_, x, k, c') ->
             substValueIntoComputation (VFun y (CWith h c)) k (substValueIntoComputation v x c')
 

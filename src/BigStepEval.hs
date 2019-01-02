@@ -11,6 +11,7 @@ import           Data.List                      ( find )
 import qualified Data.Map.Strict               as Map
 
 import           Syntax
+import           Util
 
 type Env = Map.Map VariableName Value
 emptyEnv :: Map.Map VariableName Value
@@ -68,18 +69,18 @@ veval expr env = case expr of
 
 data Error = UnhandledOp OperationName deriving (Show, Eq, Ord)
 
-top_handle :: Computation -> Env -> IO (Either Error Value)
+top_handle :: Computation -> Env -> Either Error Value
 top_handle expr env = case ceval expr env of
-  CReturn v                   -> return $ Right v
+  CReturn v                   -> Right v
 
   COperation "read" VUnit y c -> do
     let new_env = Map.insert y (VString "Hello, world") env
     top_handle c new_env
 
   COperation op _ _ _ -> do
-    return (Left (UnhandledOp op))
+    Left (UnhandledOp op)
 
   u -> error $ show u ++ "\n" ++ show env
 
-run :: Computation -> IO (Either Error Value)
+run :: Computation -> Either Error Value
 run expr = top_handle expr emptyEnv

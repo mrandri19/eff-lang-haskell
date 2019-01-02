@@ -1,6 +1,7 @@
 -- TODO: fix exports
-module Syntax where
+module TypedSyntax where
 
+import           Type
 import           Util
 
 data Value =
@@ -9,7 +10,7 @@ data Value =
     | VUnit -- Unit
     | VNum Int -- Number
     | VString String -- String
-    | VFun VariableName Computation -- Lambda
+    | VFun VariableName ValueType Computation -- Lambda
     | VHandler Handler -- Handler
     deriving (Show, Eq, Ord)
 

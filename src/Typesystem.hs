@@ -1,44 +1,38 @@
 module Typesystem where
 
-import           Syntax
 import qualified Data.Map.Strict               as Map
 
-data ValueType =
-    VTBool
-    | VTUnit
-    | VTNum
-    | VTString
-    | VTFunction ValueType ComputationType
-    | VTHandler ComputationType ComputationType
+import           TypedSyntax
+import           Type
 
-data ComputationType = CType ValueType [(OperationName, Type, Type)]
 
 data Error = Mismatch | VariableNotFound
-data Type =
-    ValueType ValueType
-    | ComputationType ComputationType
-    | Void
-
-type Env = Map.Map VariableName Type
-emptyEnv :: Map.Map VariableName Type
-emptyEnv = Map.empty
-
-
+    deriving (Show, Eq, Ord)
 
 checkValue :: Value -> Env -> Either Error Type
+
+-- Rule 1
 checkValue (VVar x) env = case env Map.!? x of
   Just t  -> Right t
   Nothing -> Left VariableNotFound
-checkValue (VBool _)    _   = return $ ValueType VTBool
-checkValue VUnit        _   = return $ ValueType VTUnit
-checkValue (VNum    _ ) _   = return $ ValueType VTNum
-checkValue (VString _ ) _   = return $ ValueType VTString
--- TODO: I don't know what to do with this:
--- do I add the type in the syntax directly?
-checkValue (VFun x c  ) env = undefined
-checkValue (VHandler h) _   = undefined
 
--- TODO: finish
+-- Rules 2-3
+checkValue (VBool _)          _   = return $ ValueType VTBool
+checkValue VUnit              _   = return $ ValueType VTUnit
+checkValue (VNum    _       ) _   = return $ ValueType VTNum
+checkValue (VString _       ) _   = return $ ValueType VTString
+
+-- Rule 4
+checkValue (VFun x argType c) env = do
+  -- Get the type of the computation c given the hypoteses:
+  -- gamma, x: A (A === argType)
+  computationType <- checkComputation c (extendEnv x (ValueType argType) env)
+  case computationType of
+    ComputationType ct -> return $ ValueType $ VTFunction argType ct
+    _                  -> Left Mismatch
+
+checkValue (VHandler h) _ = undefined
+
 checkComputation :: Computation -> Env -> Either Error Type
 checkComputation (CReturn v) env = do
   t <- checkValue v env
