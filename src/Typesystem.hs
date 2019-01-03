@@ -31,9 +31,12 @@ checkValue (VFun x argType c) env = do
     ComputationType ct -> return $ ValueType $ VTFunction argType ct
     _                  -> Left Mismatch
 
+-- Rule 5
 checkValue (VHandler h) _ = undefined
 
 checkComputation :: Computation -> Env -> Either Error Type
+
+-- Rule 7
 checkComputation (CReturn v) env = do
   t <- checkValue v env
   case t of

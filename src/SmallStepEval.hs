@@ -30,7 +30,7 @@ eval expr = case expr of
   -- Rule 8
   CWith h          (CReturn v)                -> case returnClause h of
     Just (x, cr) -> substValueIntoComputation v x cr
-    Nothing      -> error "Cannot handle a return without a return clause in the handler"
+    Nothing      -> CReturn v
 
   -- Rule 9,10
   CWith h (COperation op v y c) ->
@@ -38,7 +38,7 @@ eval expr = case expr of
     let ops = operationClauses h
     in  case find (\(op', _, _, _) -> op' == op) ops of
 
-                                                                    -- Rule 9
+                                                                                -- Rule 9
           Just (_, x, k, c') ->
             substValueIntoComputation (VFun y (CWith h c)) k (substValueIntoComputation v x c')
 

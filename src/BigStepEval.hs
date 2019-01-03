@@ -39,7 +39,7 @@ ceval expr env = case expr of
   CWith h          (CReturn v) -> case returnClause h of
       -- TODO: Not sure about this veval
     Just (x, cr) -> ceval cr (Map.insert x (veval v env) env)
-    Nothing      -> error "Cannot handle a return without a return clause in the handler"
+    Nothing      -> CReturn v
   CWith h (COperation op v y c) ->
       -- Find op in the list h ops
     let ops = operationClauses h

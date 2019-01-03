@@ -15,8 +15,8 @@ data Value =
     deriving (Show, Eq, Ord)
 
 data Handler = Handler {
-    returnClause :: Maybe (VariableName, Computation),
-    operationClauses :: [(OperationName, VariableName, ContinuationName, Computation)]
+    returnClause :: Maybe (VariableName, ValueType, Computation),
+    operationClauses :: [(OperationName, VariableName, ValueType, ContinuationName, ValueType, Computation)]
 }
     deriving (Show, Eq, Ord)
 
